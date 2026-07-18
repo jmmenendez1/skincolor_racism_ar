@@ -1,0 +1,12 @@
+# Microdatos LAPOP: no se redistribuyen
+data/
+*.dta
+*.rds
+
+# Outputs intermedios
+output/
+*.pdf
+.Rhistory
+.RData
+.DS_Store
+__MACOSX/
