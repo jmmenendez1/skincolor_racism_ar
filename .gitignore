@@ -4,7 +4,6 @@ data/
 *.rds
 
 # Outputs intermedios
-output/
 *.pdf
 .Rhistory
 .RData

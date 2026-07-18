@@ -1,8 +1,8 @@
 # Colorismo y logro educativo en Argentina — Documento vivo de especificaciones
 
-**Proyecto:** SkinColor_LATAM · **Datos:** LAPOP AmericasBarometer, Argentina 2004–2023 (v1.0_w)
-**Estado:** v0.1 — resultados preliminares (2026-07-18)
-**Código:** `R/01_prepare_data.R` (limpieza) · `R/02_models_argentina.R` (modelos)
+**Proyecto:** SkinColor_LATAM · **Datos:** LAPOP AmericasBarometer 2004–2023 (Argentina + Sudamérica)
+**Estado:** v0.2 — Argentina + comparativa sudamericana (2026-07-18)
+**Código:** `R/01_prepare_data.R` · `R/02_models_argentina.R` · `R/03_models_southamerica.R`
 
 ---
 
@@ -88,13 +88,59 @@ Descriptivo ponderado (años de educación, 25+, 2010–2019): claro 10.71 · me
 
 Distribución de `colori` truncada (solo ~6% con 6+; 377 obs. en el bin oscuro) → poca potencia en el extremo. La evaluación del encuestador puede incorporar señales de estatus del entrevistado (sesgo *hacia* encontrar efecto — y aun así casi no lo hay). No hay ID de entrevistador en el merge para FE de entrevistador. `ed2` solo en 3 olas.
 
-## 7. Agenda
+## 7. Comparativa sudamericana à la Telles (v0.2)
 
-1. Pooled sudamericano con el Grand Merge (FE de país + interacciones país × color) para poner el coeficiente argentino en contexto regional.
-2. FE de entrevistador si conseguimos el ID (archivos por ola).
-3. Outcomes alternativos: secundario completo (dummy), acceso a terciario/universitario.
-4. Sección de mecanismo: formalizar el análisis de auto-aclaramiento (gap auto−encuestador como outcome).
+**Datos:** subset del Grand Merge (`data/sudamerica_subset.dta`): 12 países, olas 2010–2019 con `colori` y `ed`, ~76.000 obs. 25+. **Especificación:** espejo exacto de M1 por país, con `colori` en escala cruda 1–11 (efecto por punto) — estandarizar dentro de cada país mezclaría diferencias de efecto con diferencias de varianza del color. Para comparabilidad se reporta también el efecto por SD *pooled* (1.69 puntos). Pooled con `weight1500` (estandariza cada país-ola) e interacciones país × color con base Argentina. Código: `R/03_models_southamerica.R`. Figura: `output/coefplot_sudamerica.png`.
+
+### 7.1 Penalidad de color por país (años de educación por +1 SD pooled)
+
+| País | N | β/SD | IC 95% | p |
+|---|---|---|---|---|
+| Uruguay | 6.524 | **−0.71** | [−0.92, −0.50] | <0.001 |
+| Bolivia | 9.547 | **−0.53** | [−0.76, −0.30] | <0.001 |
+| Surinam | 5.527 | **−0.29** | [−0.46, −0.12] | 0.001 |
+| Ecuador | 6.955 | **−0.27** | [−0.45, −0.08] | 0.006 |
+| Argentina | 5.807 | −0.16 | [−0.35, +0.03] | 0.104 |
+| Perú | 6.807 | −0.09 | [−0.27, +0.09] | 0.313 |
+| Colombia | 5.893 | −0.01 | [−0.16, +0.14] | 0.903 |
+| Venezuela | 5.002 | −0.00 | [−0.15, +0.15] | 0.995 |
+| Paraguay | 5.858 | +0.02 | [−0.12, +0.17] | 0.736 |
+| Brasil | 6.521 | +0.06 | [−0.06, +0.18] | 0.295 |
+| Chile | 7.157 | +0.09 | [−0.07, +0.26] | 0.274 |
+| Guyana | 4.770 | +0.15 | [−0.00, +0.30] | 0.052 |
+
+Pooled con interacciones (base ARG): la penalidad argentina difiere significativamente de Uruguay (−0.31 por punto, p<0.001), Bolivia (−0.27, p=0.002) y Surinam (−0.22, p=0.005) por un lado, y de Chile (+0.15, p=0.038), Guyana (+0.17, p=0.022) y Paraguay (+0.14, p=0.047) por el otro. Argentina está literalmente en el medio de la distribución regional.
+
+### 7.2 Horse race color vs. categoría, por país
+
+El patrón argentino ("la categoría le gana al color") **no** es peculiaridad nuestra: el premio por autoidentificarse blanco condicional en el tono observado es grande y significativo en Bolivia (+1.37 años), Uruguay (+1.17), Brasil (+0.89), Argentina (+0.79) y Venezuela (+0.69). Pero en Bolivia, Uruguay, Ecuador y Surinam el color *también* sobrevive con la categoría en la ecuación — en Argentina no. El caso argentino se distingue por ser casi puramente categorial.
+
+### 7.3 Mecanismo: auto-aclaramiento por país
+
+Diferencia del gap (auto − encuestador) entre tercil educativo alto y bajo: Brasil −0.81, Bolivia −0.73, Paraguay −0.60, Venezuela −0.52, **Argentina −0.47**, …, Uruguay −0.09, Guyana +0.00. La hipótesis previa (Argentina como caso extremo de auto-aclaramiento) **no se sostiene**: Brasil y Bolivia muestran más. Patrón sugerente: Uruguay, el país con mayor penalidad de color, es donde menos se "auto-aclara" la gente — donde el gradiente es más real, menos se negocia la autopercepción. A formalizar.
+
+### 7.4 Discrepancia con PERLA — abierta
+
+Nuestros nulos de Brasil (+0.06) y Colombia (−0.01) contrastan con los −0.5 y −0.39 de Telles et al. (2015). La sensibilidad muestra que **no** lo explican ni los FE de región ni el pooling de olas (Brasil da ~0 también sin FE de región y en 2010 solo). Diferencias restantes con su diseño: ellos usan la ronda PERLA 2010 con controles de origen de clase (ocupación parental) y su propia armonización de escolaridad. Pendiente: conseguir sus archivos de replicación. Hasta resolver esto, la comparación con "el rango PERLA" debe citarse con esta nota.
+
+### 7.5 Lectura
+
+La penalidad de color argentina (−0.16 ns) es mediana en la región, no excepcional. Lo distintivo de Argentina es la *forma* del racismo: puramente categorial (blanco/no blanco) y con la señal cromática debilitada — consistente con el argumento histórico del crisol. Y el hallazgo regional inesperado es **Uruguay**: la mayor penalidad de color de Sudamérica en el país más "blanco" de la muestra, con poco auto-aclaramiento. Eso merece paper propio.
+
+## 8. Caveats adicionales (v0.2)
+
+Guyana y Surinam tienen composiciones étnicas (indo-descendientes, cimarrones) donde la escala clara→oscura captura otra cosa que en el resto; sus coeficientes no son directamente comparables. El premio blanco de Guyana (+5.68) sale de un N minúsculo de autoidentificados blancos. Venezuela 2016 en contexto de crisis. `estratopri` cambia de definición entre olas en algunos países (FE conservador igual).
+
+## 9. Agenda
+
+1. ~~Pooled sudamericano~~ **Hecho (v0.2).**
+2. Conseguir archivos de replicación de Telles et al. (2015) para resolver la discrepancia de Brasil/Colombia (§7.4).
+3. FE de entrevistador si conseguimos el ID (archivos por ola).
+4. Outcomes alternativos: secundario completo (dummy), acceso a terciario/universitario.
+5. Formalizar el auto-aclaramiento (gap como outcome; correlación agregada penalidad × auto-aclaramiento, §8.3).
+6. Profundizar Uruguay (¿por qué la mayor penalidad regional?) — posible extensión o paper aparte.
 
 ## Changelog
 
+- **v0.2 (2026-07-18).** Comparativa sudamericana: 12 países, espejo de M1 por país, pooled con interacciones, horse race y auto-aclaramiento comparado. Python replicado en R. Figura `output/coefplot_sudamerica.png`. Discrepancia con PERLA documentada como abierta.
 - **v0.1 (2026-07-18).** Diseño acordado, M1–M6 + MH estimados en Python y replicados en R (coincidencia al 4.º decimal). Documento inicial.
